@@ -119,3 +119,7 @@ textarea{min-height:80px;resize:vertical}
   .item .pic{width:90px}
   .item .acts{grid-column:1/-1;justify-content:flex-end}
 }
+
+.secs{flex-direction:row!important;align-items:center;gap:8px!important;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px;font-weight:700}
+.secs select{width:auto;padding:6px 10px;font-weight:800}
+#bulkBtn,#addBtn{white-space:nowrap;flex-direction:row}

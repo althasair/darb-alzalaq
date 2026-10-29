@@ -39,7 +39,7 @@ function compress(file, maxW, keepAlpha, ratio) {
 
 /* ---------------- الحالة ---------------- */
 const D = { series: [], clips: [], slides: [], live: [], channels: [] };
-let tab = 'settings';
+let tab = ['settings', 'slides', 'series', 'clips', 'channels', 'live'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'settings';
 async function reload(col) { D[col] = col === 'channels' ? mergeChannels(await list(col)) : await list(col); }
 const chOpts = () => [['', '— بدون قناة —'], ...D.channels.map(c => [c.id, c.name])];
 
@@ -226,11 +226,15 @@ function renderList(col) {
     if (filterText) items = items.filter(c => c.title.includes(filterText));
   }
   $('#main').innerHTML = `
-    <div class="head"><div><h1>${h}</h1><p>${p}</p></div><div class="toolbar" style="margin:0">${col === 'slides' ? `<label class="btn" id="bulkBtn">${icon('plus')}رفع عدة صور دفعة واحدة<input type="file" accept="image/*" multiple hidden id="bulkInput"></label>` : ''}<button class="btn dark" id="addBtn">${icon('plus')}${add}</button></div></div>
+    <div class="head"><div><h1>${h}</h1><p>${p}</p></div><div class="toolbar" style="margin:0">${col === 'slides' ? `<label class="secs">تتغير الصورة كل<select id="tvSecs">${[3,4,5,6,7,8,9,10,12,15,20,30].map(n => `<option value="${n}" ${n === (+window.__site?.tvSeconds || 7) ? 'selected' : ''}>${n}</option>`).join('')}</select>ثوانٍ</label><label class="btn" id="bulkBtn">${icon('plus')}رفع عدة صور دفعة واحدة<input type="file" accept="image/*" multiple hidden id="bulkInput"></label>` : ''}<button class="btn dark" id="addBtn">${icon('plus')}${add}</button></div></div>
     ${col === 'clips' ? `<div class="toolbar"><input type="search" id="fText" placeholder="بحث في المقاطع…" value="${esc(filterText)}">
       <select id="fSeries"><option value="">كل المسلسلات</option>${D.series.map(s => `<option value="${s.id}" ${s.id === filterSeries ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>` : ''}
     ${items.length ? `<div class="items">${items.map(x => itemRow(col, x)).join('')}</div>` : `<div class="empty">لا توجد عناصر بعد — اضغطي «${add}»</div>`}`;
   $('#addBtn').onclick = () => openForm(col);
+  if (col === 'slides') $('#tvSecs').onchange = async e => {
+    const n = +e.target.value;
+    try { await saveSetting('site', { tvSeconds: n }); window.__site = { ...(window.__site || {}), tvSeconds: n }; toast(`صارت الصورة تتغير كل ${n} ثوانٍ`); } catch (err) { fail(err); }
+  };
   if (col === 'slides') $('#bulkInput').onchange = async e => {
     const files = [...e.target.files]; if (!files.length) return;
     let order = Math.max(0, ...D.slides.map(x => x.order || 0)), done = 0;
@@ -319,6 +323,6 @@ authWatch(async u => {
   if (u === 'denied') { $('#loginView').hidden = false; $('#appView').hidden = true; $('#loginMsg').textContent = 'هذا الحساب ليس له صلاحية الإدارة'; $('#loginMsg').style.color = 'var(--red)'; await logout(); return; }
   $('#loginView').hidden = !!u; $('#appView').hidden = !u;
   if (!u) return;
-  try { await Promise.all(['series', 'clips', 'slides', 'live', 'channels'].map(reload)); } catch (e) { fail(e); }
+  try { await Promise.all(['series', 'clips', 'slides', 'live', 'channels'].map(reload)); window.__site = { tvSeconds: 7, ...(await getSetting('site')) }; } catch (e) { fail(e); }
   renderTab();
 }).catch(fail);

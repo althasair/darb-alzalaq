@@ -288,3 +288,8 @@ img{display:block;max-width:100%}
 .ch-player{aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);max-width:1000px}
 .ch-player iframe{width:100%;height:100%;border:0;display:block}
 @media (max-width:900px){.chgrid{grid-template-columns:1fr 1fr;gap:10px}.chcard{flex-direction:column;align-items:flex-start;padding:14px;gap:10px}.chcard b{font-size:16px}.chcard small{font-size:13px}.chcard .ch-ic{width:48px;height:48px}}
+
+/* أيقونة تعديل صور الشاشة (للمشرفين فقط) */
+.tv-edit{position:absolute;z-index:5;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:var(--amber);color:var(--ink);font-weight:800;font-size:14px;direction:rtl;box-shadow:0 8px 20px rgba(0,0,0,.45);transition:background .2s}
+.tv-edit:hover{background:#fff}
+.tv-edit .ic{width:18px;height:18px}

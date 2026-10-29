@@ -1,4 +1,4 @@
-import { loadAll, CATEGORIES, ytId, ytThumb, addView, DEMO } from './data.js';
+import { loadAll, CATEGORIES, ytId, ytThumb, addView, DEMO, authWatch } from './data.js';
 import { I, CH } from './icons.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -8,6 +8,7 @@ const fillIcons = (root = document) => root.querySelectorAll('.ic[data-i]').forE
 
 let S = null;           // البيانات
 let tvTimer = null;
+let isAdminUser = false;   // تظهر أيقونة تعديل الشاشة للمشرفين فقط
 
 /* ---------------- المفضلة (على جهاز المشاهد) ---------------- */
 const FAV_KEY = 'farjan_favs';
@@ -114,6 +115,7 @@ function viewHome() {
           <div class="tv-panel"><span class="knob"></span><span class="knob"></span><span class="grille"></span></div>
         </div>
         <div class="tv-legs"><i></i><i></i></div>
+        <a class="tv-edit" href="admin.html#slides" hidden title="تعديل صور الشاشة">${icon('edit')}<span>تعديل صور الشاشة</span></a>
         ${slides.length > 1 ? `<button class="tv-arrow prev" data-tv="1" aria-label="التالي">${icon('left')}</button>
         <button class="tv-arrow next" data-tv="-1" aria-label="السابق">${icon('right')}</button>` : ''}
       </div>
@@ -324,6 +326,7 @@ function render(h) {
   $('#topbar').classList.toggle('solid', false);
   window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
   startTV(); bindSingleSlide();
+  document.querySelectorAll('.tv-edit').forEach(b => b.hidden = !isAdminUser);
   const f = $('#heroSearch') || $('#pageSearch');
   if (f) f.onsubmit = e => { e.preventDefault(); const val = f.q.value.trim(); location.hash = '#/search?q=' + encodeURIComponent(val); };
   if (a.startsWith('search')) $('#pageSearch input').focus();
@@ -358,6 +361,7 @@ window.addEventListener('hashchange', () => { inApp = true; route(); });
   document.querySelectorAll('.live-dot').forEach(d => d.hidden = !anyLive);
   renderRail();
   route();
+  authWatch(u => { isAdminUser = !!u && u !== 'denied'; document.querySelectorAll('.tv-edit').forEach(b => b.hidden = !isAdminUser); }).catch(() => {});
   if (DEMO) console.info('وضع التجربة: البيانات تجريبية ومحفوظة في هذا المتصفح فقط.');
 })();
 
