@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1a100a">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@600;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<div id="demoBar" class="demobar" hidden>وضع التجربة — التعديلات تُحفظ في هذا المتصفح فقط حتى تُضاف إعدادات Firebase. <button id="resetDemo">إعادة البيانات التجريبية</button></div>
+
+<!-- شاشة الدخول -->
+<section id="loginView" class="login" hidden>
+  <form class="login-card" id="loginForm">
+    <img src="assets/logo.png" alt="" class="login-logo" id="loginLogo">
+    <h1>لوحة التحكم</h1>
+    <p class="muted" id="loginMsg">الدخول خاص بمشرفة المنصة</p>
+    <label>البريد الإلكتروني<input type="email" name="email" required autocomplete="username" dir="ltr"></label>
+    <label>كلمة المرور<input type="password" name="pass" required autocomplete="current-password" dir="ltr"></label>
+    <button class="btn" type="submit">دخول</button>
+    <button class="link" type="button" id="forgot">نسيت كلمة المرور؟</button>
+    <a class="link" href="index.html">العودة إلى الموقع</a>
+  </form>
+</section>
+
+<!-- اللوحة -->
+<div id="appView" class="shell" hidden>
+  <aside class="side">
+    <a href="index.html" class="side-brand"><img src="assets/logo.png" alt="الشعار" id="sideLogo"></a>
+    <nav class="side-nav" id="sideNav">
+      <button data-tab="settings" class="on"><span class="ic" data-i="grid"></span>الإعدادات العامة</button>
+      <button data-tab="slides"><span class="ic" data-i="tv"></span>شاشة التلفزيون</button>
+      <button data-tab="series"><span class="ic" data-i="clapper"></span>المسلسلات</button>
+      <button data-tab="clips"><span class="ic" data-i="play"></span>المقاطع</button>
+      <button data-tab="live"><span class="ic" data-i="live"></span>المباشر</button>
+    </nav>
+    <div class="side-foot">
+      <a href="index.html" target="_blank" class="side-link"><span class="ic" data-i="eye"></span>معاينة الموقع</a>
+      <button id="logout" class="side-link"><span class="ic" data-i="user"></span>تسجيل الخروج</button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<dialog id="dlg" class="dlg">
+  <form method="dialog" id="dlgForm" class="dlg-form" novalidate>
+    <header class="dlg-head"><h2 id="dlgTitle"></h2><button value="cancel" class="x" aria-label="إغلاق"><span class="ic" data-i="close"></span></button></header>
+    <div id="dlgBody" class="dlg-body"></div>
+    <footer class="dlg-foot"><button class="btn" value="save" id="dlgSave">حفظ</button><button class="btn ghost" value="cancel">إلغاء</button></footer>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="admin.js"></script>
+</body>
+</html>

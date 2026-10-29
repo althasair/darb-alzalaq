@@ -1,0 +1,121 @@
+:root{--night:#1a100a;--amber:#f6c37c;--amber-d:#e3a14c;--ivory:#fbf7f1;--ink:#2a1d15;--ink-2:#6f5f53;--line:#eadfd2;--red:#e2463c;--green:#1f8a5b;--font:'Tajawal',system-ui,sans-serif;--display:'El Messiri','Tajawal',serif}
+*{box-sizing:border-box}
+body{margin:0;font-family:var(--font);background:var(--ivory);color:var(--ink);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+[hidden]{display:none!important}
+.ic{display:inline-flex;width:1.2em;height:1.2em;flex:none}.ic svg{width:100%;height:100%}
+.muted{color:var(--ink-2)}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px;border-radius:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:12px;font-weight:700;background:var(--amber);color:var(--ink);transition:background .2s}
+.btn:hover{background:var(--amber-d)}
+.btn.ghost{background:#efe7dd}.btn.ghost:hover{background:#e5dace}
+.btn.dark{background:var(--ink);color:#fff}.btn.dark:hover{background:#000}
+.link{color:#a7432f;font-weight:700;text-align:center;font-size:14px}
+
+.demobar{background:#fff3d6;color:#7a4b0d;text-align:center;padding:9px 14px;font-size:14px;font-weight:500}
+.demobar button{text-decoration:underline;font-weight:700;margin-inline-start:8px}
+
+/* الدخول */
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(60% 60% at 80% 10%,rgba(246,170,80,.3),transparent 70%),linear-gradient(180deg,#1d120b,#3a2214)}
+.login-card{width:min(400px,100%);background:#fff;border-radius:24px;padding:30px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 70px -20px rgba(0,0,0,.6)}
+.login-logo{height:70px;width:auto;margin:0 auto}
+.login-card h1{margin:0;text-align:center;font-family:var(--display);font-size:28px}
+.login-card .muted{text-align:center;margin:0 0 6px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+input,textarea,select{font:inherit;font-weight:500;font-size:16px;padding:11px 13px;border:1.5px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);width:100%}
+input:focus,textarea:focus,select:focus{outline:0;border-color:var(--amber-d);box-shadow:0 0 0 3px rgba(246,195,124,.35)}
+textarea{min-height:80px;resize:vertical}
+
+/* الهيكل */
+.shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;background:var(--night);color:#e9d9c7;display:flex;flex-direction:column;padding:18px 14px}
+.side-brand img{height:62px;width:auto;margin:4px auto 22px}
+.side-nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.side-nav button,.side-link{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;font-weight:700;font-size:15.5px;text-align:start;transition:background .2s}
+.side-nav button:hover,.side-link:hover{background:rgba(255,255,255,.08)}
+.side-nav button.on{background:var(--amber);color:var(--ink)}
+.side-foot{display:flex;flex-direction:column;gap:2px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}
+.side-link{font-weight:500;font-size:14.5px}
+.main{padding:28px clamp(16px,3vw,40px) 60px;min-width:0}
+.head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.head h1{margin:0;font-family:var(--display);font-size:30px}
+.head p{margin:4px 0 0;color:var(--ink-2)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar input,.toolbar select{width:auto;min-width:200px}
+
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
+.panel h2{margin:0 0 14px;font-size:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid .full{grid-column:1/-1}
+
+/* القوائم */
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:auto 132px 1fr auto;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.item .ord{display:flex;flex-direction:column;gap:2px}
+.item .ord button{width:28px;height:24px;border-radius:7px;display:grid;place-items:center;color:var(--ink-2)}
+.item .ord button:hover{background:#f2ebe3}
+.item .ord .ic{width:14px;height:14px}
+.item .ord .up .ic{transform:rotate(90deg)}.item .ord .down .ic{transform:rotate(-90deg)}
+.item .pic{width:132px;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:radial-gradient(circle at 30% 30%,#9a6238,#3a1f10);display:grid;place-items:center;color:#fbe7c9;font-family:var(--display);font-size:13px;text-align:center;padding:4px}
+.item .pic img{width:100%;height:100%;object-fit:cover}
+.item h3{margin:0 0 4px;font-size:16px}
+.item .meta{display:flex;flex-wrap:wrap;gap:6px;color:var(--ink-2);font-size:13px}
+.tag{background:#f4ede5;border-radius:6px;padding:2px 8px;font-weight:500}
+.tag.live{background:#fde2df;color:var(--red);font-weight:800}
+.tag.off{background:#eee;color:#888}
+.tag.warn{background:#fff1d6;color:#8a5a12}
+.acts{display:flex;gap:6px}
+.acts button{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#f6f1eb;color:var(--ink-2)}
+.acts button:hover{background:#ece3d8;color:var(--ink)}
+.acts button.del:hover{background:#fde2df;color:var(--red)}
+.empty{text-align:center;padding:40px;color:var(--ink-2);background:#fff;border:1.5px dashed var(--line);border-radius:18px}
+
+/* الصور */
+.imgfield{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.imgprev{width:180px;aspect-ratio:16/9;border-radius:12px;border:1.5px dashed var(--line);background:#faf6f1 center/contain no-repeat;display:grid;place-items:center;color:var(--ink-2);font-size:13px}
+.imgprev.logo{background-color:#3a2214}
+.imgfield .btns{display:flex;flex-direction:column;gap:8px}
+.imgfield .btn{padding:8px 14px;font-size:14px}
+.hint{font-size:12.5px;color:var(--ink-2);font-weight:500}
+
+/* الخيارات */
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{flex-direction:row;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;font-weight:500;cursor:pointer}
+.checks input{width:auto;accent-color:var(--ink)}
+.switch{flex-direction:row!important;align-items:center;gap:10px!important;cursor:pointer}
+.switch input{appearance:none;width:46px;height:26px;border-radius:999px;background:#d9cfc4;position:relative;padding:0;border:0;cursor:pointer;transition:background .2s;flex:none}
+.switch input::after{content:"";position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch input:checked{background:var(--green)}
+.switch input:checked::after{transform:translateX(-20px)}
+.ytprev{display:flex;gap:12px;align-items:center;margin-top:8px}
+.ytprev img{width:160px;border-radius:10px}
+
+/* النافذة */
+.dlg{border:0;border-radius:22px;padding:0;width:min(640px,calc(100% - 24px));max-height:calc(100vh - 30px);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.dlg::backdrop{background:rgba(20,12,7,.6);backdrop-filter:blur(3px)}
+.dlg-form{display:flex;flex-direction:column;max-height:calc(100vh - 30px)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:0;font-size:20px}
+.x{width:38px;height:38px;border-radius:10px;display:grid;place-items:center}.x:hover{background:#f2ebe3}
+.dlg-body{padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.dlg-foot{display:flex;gap:10px;padding:14px 22px;border-top:1px solid var(--line)}
+
+.toast{position:fixed;z-index:200;bottom:24px;left:50%;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:700;transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--red)}
+
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:sticky;z-index:20;height:auto;flex-direction:row;align-items:center;padding:8px;gap:6px;overflow-x:auto}
+  .side-brand,.side-foot .side-link span:not(.ic){display:none}
+  .side-brand img{height:40px;margin:0}
+  .side-nav{flex-direction:row;flex:none}
+  .side-nav button{white-space:nowrap;padding:9px 12px;font-size:14px}
+  .side-foot{flex-direction:row;border:0;padding:0}
+  .form-grid{grid-template-columns:1fr}
+  .item{grid-template-columns:auto 90px 1fr;}
+  .item .pic{width:90px}
+  .item .acts{grid-column:1/-1;justify-content:flex-end}
+}

@@ -1,0 +1,22 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email in ['althasair@gmail.com'];
+    }
+
+    // الجميع يقرأ، والمشرفة فقط تكتب
+    match /{col}/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // يسمح للزوار بزيادة عدّاد المشاهدات فقط (+1)
+    match /clips/{id} {
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+                    && request.resource.data.views == resource.data.get('views', 0) + 1;
+    }
+  }
+}
