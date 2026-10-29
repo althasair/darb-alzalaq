@@ -88,12 +88,44 @@ export async function getSetting(id) {
   const s = await fs.getDoc(fs.doc(db, 'settings', id));
   return s.exists() ? s.data() : {};
 }
+/* ---------------- القنوات ----------------
+   القنوات الافتراضية تظهر فوراً بلا إعداد؛ أي تعديل من لوحة التحكم يُحفظ بنفس المعرّف ويغطي الافتراضي */
+export const CHANNEL_ICONS = {
+  tv: 'تلفزيون', plus: 'إضافة', music: 'موسيقى', monitor: 'شاشة', moonstar: 'هلال', shapes: 'أشكال',
+  globe: 'كرة أرضية', news: 'صحيفة', trophy: 'كأس', book: 'كتاب', people: 'أشخاص', film: 'فيلم',
+  clap: 'كلاكيت', masks: 'أقنعة المسرح', smile: 'وجه مبتسم'
+};
+export const DEFAULT_CHANNELS = [
+  ['ch-main', 'الوطن', 'القناة العامة', '#7e2233', 'tv'],
+  ['ch-plus', 'الوطن بلس +', 'إعادات ومحتوى إضافي', '#a8894e', 'plus'],
+  ['ch-music', 'الوطن غناوي', 'الأغاني والطرب', '#7a52a8', 'music'],
+  ['ch-hd', 'الوطن HD', 'نسخة البث عالي الدقة', '#3d6ea3', 'monitor'],
+  ['ch-classic', 'الوطن كلاسيك', 'أعمال الزمن الجميل', '#7d6a55', 'monitor'],
+  ['ch-ramadan', 'الوطن رمضان', 'المسلسلات والبرامج الرمضانية', '#3f7f78', 'moonstar'],
+  ['ch-kids', 'الوطن أطفال', 'الكرتون والبرامج العائلية', '#5585cc', 'shapes'],
+  ['ch-docs', 'الوطن وثائقية', 'التاريخ والعلوم والوثائقيات', '#677b57', 'globe'],
+  ['ch-news', 'الوطن الإخبارية', 'الأخبار والتقارير', '#9a3540', 'news'],
+  ['ch-sports', 'الوطن الرياضية', 'المباريات والتحليل الرياضي', '#3a7a62', 'trophy'],
+  ['ch-culture', 'الوطن الثقافية', 'التراث والأدب والفنون', '#8a68a8', 'book'],
+  ['ch-social', 'الوطن الاجتماعية', 'الأسرة والمجتمع', '#b56f85', 'people'],
+  ['ch-films', 'الوطن أفلام', 'الأفلام العربية والخليجية', '#343b55', 'film'],
+  ['ch-series', 'الوطن مسلسلات', 'الدراما الخليجية والعربية', '#a96c42', 'clap'],
+  ['ch-theater', 'الوطن مسرحيات', 'المسرح الكويتي والخليجي', '#7d4f9f', 'masks'],
+  ['ch-comedy', 'الوطن كوميديا', 'المشاهد والمقاطع المضحكة', '#cca447', 'smile']
+].map(([id, name, desc, color, icon], i) => ({ id, name, desc, color, icon, youtube: '', isLive: false, order: i + 1, isDefault: true }));
+export const isDefaultChannel = id => DEFAULT_CHANNELS.some(c => c.id === id);
+export function mergeChannels(docs) {
+  const map = new Map(DEFAULT_CHANNELS.map(c => [c.id, { ...c }]));
+  (docs || []).forEach(d => map.set(d.id, { ...(map.get(d.id) || {}), ...d }));
+  return [...map.values()].filter(c => !c.deleted).sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+}
+
 export async function loadAll() {
-  const [site, logo, hero, slides, series, clips, live] = await Promise.all([
+  const [site, logo, hero, slides, series, clips, live, channels] = await Promise.all([
     getSetting('site'), getSetting('logo'), getSetting('hero'),
-    list('slides'), list('series'), list('clips'), list('live')
+    list('slides'), list('series'), list('clips'), list('live'), list('channels')
   ]);
-  return { site: { ...seed().settings.site, ...site }, logo: logo.data || '', hero: hero.data || '', slides, series, clips, live };
+  return { site: { ...seed().settings.site, ...site }, logo: logo.data || '', hero: hero.data || '', slides, series, clips, live, channels: mergeChannels(channels) };
 }
 
 /* ---------------- الكتابة (لوحة التحكم) ---------------- */
@@ -132,7 +164,7 @@ export async function authWatch(cb) {
   await init();
   authMod = await import(FB + 'firebase-auth.js');
   auth = authMod.getAuth(app);
-  authMod.onAuthStateChanged(auth, u => cb(u && ADMIN_EMAILS.includes((u.email || '').toLowerCase()) ? u : (u ? 'denied' : null)));
+  authMod.onAuthStateChanged(auth, u => cb(u && (!ADMIN_EMAILS.length || ADMIN_EMAILS.includes((u.email || '').toLowerCase())) ? u : (u ? 'denied' : null)));
 }
 export async function login(email, pass) {
   if (DEMO) { sessionStorage.setItem('farjan_demo_admin', '1'); location.reload(); return; }

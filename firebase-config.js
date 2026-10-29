@@ -10,5 +10,6 @@ export const firebaseConfig = {
   appId: "1:57839762843:web:358b4c918ae1b7cf87753e"
 };
 
-// البريد المسموح له بالدخول إلى لوحة التحكم (يجب أن يطابق ما في قواعد Firestore)
-export const ADMIN_EMAILS = ["althasair@gmail.com"];
+// قائمة فارغة = كل حساب مضاف في Firebase Authentication يدخل لوحة التحكم
+// (إنشاء الحسابات من الموقع مقفل من إعدادات Firebase، فلا يضيف حساباً إلا صاحبة المشروع)
+export const ADMIN_EMAILS = [];
