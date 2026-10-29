@@ -123,3 +123,7 @@ textarea{min-height:80px;resize:vertical}
 .secs{flex-direction:row!important;align-items:center;gap:8px!important;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:6px 12px;font-weight:700}
 .secs select{width:auto;padding:6px 10px;font-weight:800}
 #bulkBtn,#addBtn{white-space:nowrap;flex-direction:row}
+
+.side-home{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 16px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--amber);color:var(--amber);font-weight:800;font-size:15.5px;transition:all .2s}
+.side-home:hover{background:var(--amber);color:var(--ink)}
+@media (max-width:860px){.side-home{margin:0;padding:9px 12px;white-space:nowrap;flex:none;font-size:14px}}

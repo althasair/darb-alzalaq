@@ -244,6 +244,7 @@ function renderList(col) {
       catch (err) { fail(err); break; }
     }
     await reload('slides'); renderTab(); toast(`تمت إضافة ${done} صورة إلى شاشة التلفزيون`);
+    if (done && confirm(`تمت إضافة ${done} صورة. هل تريدين الرجوع للصفحة الرئيسية لمشاهدتها؟`)) location.href = 'index.html';
   };
   if (col === 'clips') {
     $('#fSeries').onchange = e => { filterSeries = e.target.value; renderList(col); };
