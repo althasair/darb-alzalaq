@@ -30,9 +30,14 @@
   <nav class="nav nav-tools" aria-label="أدوات">
     <button class="tool" id="btnSearch" aria-label="بحث"><span class="ic" data-i="search"></span></button>
     <a href="#/favs" data-route="favs" class="tool nav-link"><span class="ic" data-i="heart"></span><span class="t">مفضلتي</span></a>
-    <a href="admin.html" class="tool"><span class="ic" data-i="user"></span><span class="t">تسجيل الدخول</span></a>
+    <a href="admin.html" class="tool admin-btn" title="لوحة التحكم"><span class="ic" data-i="grid"></span><span class="t">لوحة التحكم</span></a>
   </nav>
 </header>
+
+<aside class="rail" aria-label="القنوات">
+  <div class="rail-head"><span class="ic" data-i="tv"></span>القنوات</div>
+  <nav class="rail-list" id="railList"></nav>
+</aside>
 
 <main id="view" tabindex="-1"></main>
 
@@ -43,9 +48,9 @@
 
 <nav class="tabbar" aria-label="تنقل سريع">
   <a href="#/" data-route="home"><span class="ic" data-i="home"></span>الرئيسية</a>
-  <a href="#/series" data-route="series"><span class="ic" data-i="tv"></span>المسلسلات</a>
+  <a href="#/channels" data-route="channels"><span class="ic" data-i="tv"></span>القنوات</a>
   <a href="#/live" data-route="live" class="tab-live"><span class="ic" data-i="live"></span>المباشر<span class="live-dot" hidden></span></a>
-  <a href="#/clips" data-route="clips"><span class="ic" data-i="clapper"></span>المقاطع</a>
+  <a href="#/series" data-route="series"><span class="ic" data-i="clapper"></span>المسلسلات</a>
   <a href="#/favs" data-route="favs"><span class="ic" data-i="heart"></span>مفضلتي</a>
 </nav>
 

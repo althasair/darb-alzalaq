@@ -1,5 +1,5 @@
 import { loadAll, CATEGORIES, ytId, ytThumb, addView, DEMO } from './data.js';
-import { I } from './icons.js';
+import { I, CH } from './icons.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -98,7 +98,7 @@ function viewHome() {
       <span class="big ic">${I[c.icon]}</span><b>${esc(catLabel(c.key))}</b><span class="chev">${icon('left')}</span></a>`).join('');
 
   return `
-  <section class="hero ${S.hero ? 'has-bg' : ''}" ${S.hero ? `style="background-image:url('${S.hero}')"` : ''}>
+  <section class="hero has-bg" style="background-image:url('${S.hero || 'hero.jpg'}')">
     <div class="hero-inner">
       <div class="hero-text">
         <h1>${esc(S.site.heroTitle)}</h1>
@@ -196,8 +196,41 @@ function viewSeasons() {
   const keys = Object.keys(groups);
   return pageHero(S.site.seasonsLabel, 'المسلسلات مرتبة حسب الموسم') + sheet(keys.length ? keys.map(k => `<div class="season-block">${row(k, groups[k], '', seriesCard).replace('class="sec"', 'class="sec"')}</div>`).join('') : empty('لا توجد مواسم بعد', 'moon'));
 }
+/* ---------------- القنوات ---------------- */
+const chLive = c => !!(c.isLive && ytId(c.youtube));
+const chIcon = c => `<span class="ch-ic" style="--c:${esc(c.color || '#7e2233')}">${CH[c.icon] || CH.tv}</span>`;
+function renderRail() {
+  $('#railList').innerHTML = S.channels.map(c => `<a class="rail-item" href="#/channel/${c.id}" data-ch="${c.id}">
+      ${chIcon(c)}<span class="rail-t"><b>${esc(c.name)}</b><small>${esc(c.desc || '')}</small></span>
+      ${chLive(c) ? '<span class="live-dot" title="مباشر الآن"></span>' : ''}</a>`).join('');
+}
+const channelCard = c => `<a class="chcard" href="#/channel/${c.id}">${chIcon(c)}
+    <span><b>${esc(c.name)}</b><small>${esc(c.desc || '')}</small></span>
+    ${chLive(c) ? '<span class="live-badge"><span class="live-dot"></span>مباشر</span>' : ''}</a>`;
+function viewChannels() {
+  return pageHero('القنوات', `${S.channels.length} قناة`) + sheet(`<div class="chgrid">${S.channels.map(channelCard).join('')}</div>`);
+}
+function viewChannel(id) {
+  const c = S.channels.find(x => x.id === id);
+  if (!c) return pageHero('غير موجودة') + sheet(empty('هذه القناة غير موجودة', 'tv'));
+  const yid = ytId(c.youtube);
+  const ser = S.series.filter(s => s.channelId === id);
+  const clips = S.clips.filter(x => x.channelId === id || ser.some(s => s.id === x.seriesId));
+  const head = `<section class="page-hero ch-hero" style="--c:${esc(c.color || '#7e2233')}">
+      <div class="ch-head">${chIcon(c)}<div><h1>${esc(c.name)}</h1><p>${esc(c.desc || '')}</p></div>
+      ${chLive(c) ? '<span class="pill-live"><span class="live-dot"></span>مباشر الآن</span>' : ''}</div></section>`;
+  const live = yid ? `<section class="sec"><div class="sec-head"><h2>${chLive(c) ? 'البث المباشر' : 'بث القناة'}</h2></div>
+      <div class="ch-player"><iframe src="https://www.youtube-nocookie.com/embed/${yid}?rel=0&playsinline=1" title="${esc(c.name)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div></section>` : '';
+  const body = live + row('المسلسلات', ser, '', seriesCard) + (clips.length ? `<section class="sec"><div class="sec-head"><h2>المقاطع</h2></div>${grid(clips)}</section>` : '');
+  return head + sheet(body || empty('لم يُضف محتوى لهذه القناة بعد — يُضاف من لوحة التحكم', 'tv'));
+}
+
 function viewLive() {
-  return pageHero('المباشر', S.live.some(l => l.isLive) ? 'بث مباشر الآن' : 'لا يوجد بث مباشر حالياً') + sheet(S.live.length ? grid(S.live, liveCard) : empty('لا يوجد بث مباشر حالياً', 'live'));
+  const chs = S.channels.filter(chLive);
+  const any = S.live.some(l => l.isLive) || chs.length;
+  const chSec = chs.length ? `<section class="sec"><div class="sec-head"><h2>قنوات تبث الآن</h2></div><div class="chgrid">${chs.map(channelCard).join('')}</div></section>` : '';
+  const lSec = S.live.length ? `<section class="sec"><div class="sec-head"><h2>البث المباشر</h2></div>${grid(S.live, liveCard)}</section>` : '';
+  return pageHero('المباشر', any ? 'بث مباشر الآن' : 'لا يوجد بث مباشر حالياً') + sheet(chSec + lSec || empty('لا يوجد بث مباشر حالياً', 'live'));
 }
 function viewFavs() {
   const f = getFavs(); const items = S.clips.filter(c => f.includes(c.id));
@@ -280,11 +313,14 @@ function render(h) {
     case 'series': html = b ? viewSeries(b) : viewSeriesList(); break;
     case 'seasons': html = viewSeasons(); break;
     case 'live': html = viewLive(); break;
+    case 'channels': html = viewChannels(); break;
+    case 'channel': html = viewChannel(b); key = 'channels'; break;
     case 'favs': html = viewFavs(); break;
     default: html = a.startsWith('search') ? viewSearch(q) : viewHome(); key = a.startsWith('search') ? 'search' : 'home';
   }
   const v = $('#view'); v.innerHTML = html;
   document.querySelectorAll('[data-route]').forEach(el => el.classList.toggle('active', el.dataset.route === key));
+  document.querySelectorAll('.rail-item').forEach(el => el.classList.toggle('active', a === 'channel' && el.dataset.ch === b));
   $('#topbar').classList.toggle('solid', false);
   window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
   startTV(); bindSingleSlide();
@@ -318,7 +354,9 @@ window.addEventListener('hashchange', () => { inApp = true; route(); });
   document.title = S.site.siteName;
   if (S.logo) { $('#logo').src = S.logo; $('#footLogo').src = S.logo; }
   document.querySelectorAll('.seasons-label').forEach(el => el.textContent = S.site.seasonsLabel);
-  document.querySelectorAll('.live-dot').forEach(d => d.hidden = !S.live.some(l => l.isLive));
+  const anyLive = S.live.some(l => l.isLive) || S.channels.some(chLive);
+  document.querySelectorAll('.live-dot').forEach(d => d.hidden = !anyLive);
+  renderRail();
   route();
   if (DEMO) console.info('وضع التجربة: البيانات تجريبية ومحفوظة في هذا المتصفح فقط.');
 })();

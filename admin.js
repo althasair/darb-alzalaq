@@ -1,5 +1,5 @@
-import { DEMO, CATEGORIES, ytId, ytThumb, list, getSetting, save, saveSetting, remove, authWatch, login, logout, resetPassword, resetDemo, init } from './data.js';
-import { I } from './icons.js';
+import { DEMO, CATEGORIES, ytId, ytThumb, mergeChannels, isDefaultChannel, CHANNEL_ICONS, list, getSetting, save, saveSetting, remove, authWatch, login, logout, resetPassword, resetDemo, init } from './data.js';
+import { I, CH } from './icons.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -38,9 +38,10 @@ function compress(file, maxW, keepAlpha, ratio) {
 }
 
 /* ---------------- الحالة ---------------- */
-const D = { series: [], clips: [], slides: [], live: [] };
+const D = { series: [], clips: [], slides: [], live: [], channels: [] };
 let tab = 'settings';
-async function reload(col) { D[col] = await list(col); }
+async function reload(col) { D[col] = col === 'channels' ? mergeChannels(await list(col)) : await list(col); }
+const chOpts = () => [['', '— بدون قناة —'], ...D.channels.map(c => [c.id, c.name])];
 
 /* ---------------- تعريف النماذج ---------------- */
 const SCHEMAS = {
@@ -56,6 +57,7 @@ const SCHEMAS = {
     title: 'مسلسل', fields: () => [
       { k: 'name', label: 'اسم المسلسل', type: 'text', req: true },
       { k: 'season', label: 'الموسم', type: 'text', ph: 'مثال: رمضان 2027 أو كلاسيكيات', list: [...new Set(D.series.map(s => s.season).filter(Boolean))] },
+      { k: 'channelId', label: 'القناة', type: 'select', opts: chOpts },
       { k: 'desc', label: 'نبذة قصيرة', type: 'textarea' },
       { k: 'poster', label: 'صورة المسلسل (طولية)', type: 'image', maxW: 700, hint: 'اختيارية — إن تُركت فارغة تُستخدم صورة أول مقطع.' }
     ]
@@ -65,8 +67,19 @@ const SCHEMAS = {
       { k: 'youtube', label: 'رابط المقطع من يوتيوب', type: 'youtube', req: true },
       { k: 'title', label: 'عنوان المقطع', type: 'text', req: true },
       { k: 'seriesId', label: 'المسلسل', type: 'select', opts: () => [['', '— اختاري —'], ...D.series.map(s => [s.id, s.name])] },
+      { k: 'channelId', label: 'القناة', type: 'select', opts: chOpts, hint: 'إن تُركت فارغة يظهر المقطع في قناة مسلسله.' },
       { k: 'cats', label: 'التصنيفات', type: 'checks', opts: () => CATEGORIES.filter(c => c.key !== 'top').map(c => [c.key, c.key === 'ramadan' ? (window.__site?.ramadanLabel || c.label) : c.label]) },
       { k: 'duration', label: 'المدة', type: 'text', ph: '03:25', ltr: true }
+    ]
+  },
+  channels: {
+    title: 'قناة', fields: () => [
+      { k: 'name', label: 'اسم القناة', type: 'text', req: true },
+      { k: 'desc', label: 'الوصف القصير', type: 'text' },
+      { k: 'color', label: 'لون القناة', type: 'color', def: '#7e2233' },
+      { k: 'icon', label: 'الأيقونة', type: 'select', opts: () => Object.entries(CHANNEL_ICONS) },
+      { k: 'youtube', label: 'رابط البث المباشر من يوتيوب', type: 'youtube', hint: 'رابط بث القناة (youtube.com/live/…). يظهر داخل صفحة القناة.' },
+      { k: 'isLive', label: 'مباشر الآن (تظهر نقطة حمراء بجانب القناة)', type: 'switch', def: false }
     ]
   },
   live: {
@@ -85,6 +98,7 @@ function fieldHTML(f, v) {
   const id = 'f_' + f.k;
   const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
   switch (f.type) {
+    case 'color': return `<label>${f.label}<input type="color" name="${f.k}" value="${esc(v || f.def)}" style="height:48px;padding:4px;cursor:pointer">${hint}</label>`;
     case 'textarea': return `<label>${f.label}<textarea id="${id}" name="${f.k}">${esc(v)}</textarea>${hint}</label>`;
     case 'select': return `<label>${f.label}<select id="${id}" name="${f.k}">${f.opts().map(([val, t]) => `<option value="${esc(val)}" ${val === (v || '') ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>${hint}</label>`;
     case 'checks': return `<div><label>${f.label}</label><div class="checks">${f.opts().map(([val, t]) => `<label><input type="checkbox" name="${f.k}" value="${val}" ${(v || []).includes(val) ? 'checked' : ''}>${esc(t)}</label>`).join('')}</div></div>`;
@@ -178,15 +192,19 @@ function itemRow(col, x) {
       ...(x.cats || []).map(k => `<span class="tag">${esc((CATEGORIES.find(c => c.key === k) || {}).label || k)}</span>`),
       x.duration ? `<span class="tag" dir="ltr">${esc(x.duration)}</span>` : '', `<span class="tag">${x.views || 0} مشاهدة</span>`,
       ytId(x.youtube) ? '' : '<span class="tag warn">بلا رابط</span>'];
+  } else if (col === 'channels') {
+    title = x.name;
+    const n = D.clips.filter(c => c.channelId === x.id).length + D.series.filter(c => c.channelId === x.id).length;
+    meta = [x.desc ? `<span class="tag">${esc(x.desc)}</span>` : '', x.isLive && ytId(x.youtube) ? '<span class="tag live">● مباشر الآن</span>' : (ytId(x.youtube) ? '<span class="tag">رابط البث مضاف</span>' : '<span class="tag off">بلا بث</span>'), `<span class="tag">${n} عنصر</span>`];
   } else if (col === 'live') {
     pic = x.poster || (ytId(x.youtube) ? ytThumb(ytId(x.youtube)) : ''); title = x.title;
     meta = [x.isLive ? '<span class="tag live">● مباشر الآن</span>' : '<span class="tag off">متوقف</span>', x.desc ? `<span class="tag">${esc(x.desc)}</span>` : ''];
   }
   return `<div class="item" data-id="${x.id}">
     <div class="ord"><button class="up" data-move="-1" aria-label="أعلى">${icon('left')}</button><button class="down" data-move="1" aria-label="أسفل">${icon('left')}</button></div>
-    <div class="pic">${pic ? `<img src="${esc(pic)}" alt="" loading="lazy">` : esc(title)}</div>
+    <div class="pic" ${col === 'channels' ? `style="background:${esc(x.color || '#7e2233')};color:#fff"` : ''}>${col === 'channels' ? `<span style="width:34px;height:34px;display:block">${CH[x.icon] || CH.tv}</span>` : (pic ? `<img src="${esc(pic)}" alt="" loading="lazy">` : esc(title))}</div>
     <div><h3>${esc(title)}</h3><div class="meta">${meta.join('')}</div></div>
-    <div class="acts">${col === 'live' ? `<button data-toggle-live title="تشغيل/إيقاف المباشر">${icon('live')}</button>` : ''}<button data-edit aria-label="تعديل">${icon('edit')}</button><button class="del" data-del aria-label="حذف">${icon('trash')}</button></div>
+    <div class="acts">${col === 'live' || col === 'channels' ? `<button data-toggle-live title="تشغيل/إيقاف المباشر">${icon('live')}</button>` : ''}<button data-edit aria-label="تعديل">${icon('edit')}</button><button class="del" data-del aria-label="حذف">${icon('trash')}</button></div>
   </div>`;
 }
 
@@ -194,6 +212,7 @@ const TAB_INFO = {
   slides: ['شاشة التلفزيون', 'الصور التي تتقلب داخل شاشة التلفزيون في الصفحة الرئيسية', 'إضافة شريحة'],
   series: ['المسلسلات', 'أضيفي المسلسلات أولاً ثم اربطي بها المقاطع', 'إضافة مسلسل'],
   clips: ['المقاطع', 'الصقي رابط يوتيوب وتُجلب الصورة تلقائياً', 'إضافة مقطع'],
+  channels: ['القنوات', 'القنوات الظاهرة على يمين الموقع — لكل قناة رابط بث مباشر ومحتوى خاص بها', 'إضافة قناة'],
   live: ['المباشر', 'روابط البث المباشر — فعّلي «مباشر الآن» ليظهر في أعلى الصفحة الرئيسية', 'إضافة بث']
 };
 let filterSeries = '', filterText = '';
@@ -232,7 +251,7 @@ function renderList(col) {
     row.querySelector('[data-edit]').onclick = () => openForm(col, x);
     row.querySelector('[data-del]').onclick = async () => {
       if (!confirm(`حذف «${x.title || x.name}»؟ لا يمكن التراجع.`)) return;
-      try { await remove(col, id); await reload(col); toast('تم الحذف'); renderTab(); } catch (e) { fail(e); }
+      try { if (col === 'channels' && isDefaultChannel(id)) await save(col, id, { deleted: true }); else await remove(col, id); await reload(col); toast('تم الحذف'); renderTab(); } catch (e) { fail(e); }
     };
     const tl = row.querySelector('[data-toggle-live]');
     if (tl) tl.onclick = async () => { try { await save(col, id, { isLive: !x.isLive }); await reload(col); toast(!x.isLive ? 'البث ظاهر الآن كمباشر' : 'تم إيقاف شارة المباشر'); renderTab(); } catch (e) { fail(e); } };
@@ -300,6 +319,6 @@ authWatch(async u => {
   if (u === 'denied') { $('#loginView').hidden = false; $('#appView').hidden = true; $('#loginMsg').textContent = 'هذا الحساب ليس له صلاحية الإدارة'; $('#loginMsg').style.color = 'var(--red)'; await logout(); return; }
   $('#loginView').hidden = !!u; $('#appView').hidden = !u;
   if (!u) return;
-  try { await Promise.all(['series', 'clips', 'slides', 'live'].map(reload)); } catch (e) { fail(e); }
+  try { await Promise.all(['series', 'clips', 'slides', 'live', 'channels'].map(reload)); } catch (e) { fail(e); }
   renderTab();
 }).catch(fail);
