@@ -60,7 +60,7 @@ function seed() {
   const live = [{ id: 'l1', title: 'بث مباشر تجريبي', desc: 'أضيفي رابط البث من لوحة التحكم', youtube: '', isLive: true, order: 1 }];
   return {
     settings: {
-      site: { siteName: 'درب الزلق', heroTitle: 'أجمل المسلسلات .. في مكان واحد', heroSubtitle: 'مقاطع مختارة .. لحظات لا تُنسى من مسلسلات رمضان 2027', seasonsLabel: 'مواسم رمضان', ramadanLabel: 'مقاطع رمضان 2027', tvSeconds: 5 },
+      site: { siteName: 'درب الزلق', heroTitle: 'أجمل المسلسلات .. في مكان واحد', heroSubtitle: 'مقاطع مختارة .. لحظات لا تُنسى من مسلسلات رمضان 2027', seasonsLabel: 'مواسم رمضان', ramadanLabel: 'مقاطع رمضان 2027', tvSeconds: 7 },
       logo: { data: '' }, hero: { data: '' }
     },
     series, clips, slides, live

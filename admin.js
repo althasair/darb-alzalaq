@@ -13,13 +13,20 @@ function toast(msg, err) {
 const fail = e => { console.error(e); toast(e?.code === 'permission-denied' ? 'لا توجد صلاحية للحفظ — راجعي قواعد Firestore' : 'تعذّر الحفظ: ' + (e?.message || e), true); };
 
 /* ---------------- ضغط الصور (تُحفظ داخل Firestore بلا حاجة لخدمة تخزين) ---------------- */
-function compress(file, maxW, keepAlpha) {
+// ratio: إن وُجد تُقص الصورة من المنتصف لتطابق نسبة شاشة التلفزيون فتظهر كل الصور بالحجم نفسه
+const TV_RATIO = 1.45;
+function compress(file, maxW, keepAlpha, ratio) {
   return new Promise((res, rej) => {
     const img = new Image(); const url = URL.createObjectURL(file);
     img.onload = () => {
-      const sc = Math.min(1, maxW / img.width);
-      const cv = document.createElement('canvas'); cv.width = Math.round(img.width * sc); cv.height = Math.round(img.height * sc);
-      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
+      let sx = 0, sy = 0, sw = img.width, sh = img.height;
+      if (ratio) {
+        if (sw / sh > ratio) { const w = sh * ratio; sx = (sw - w) / 2; sw = w; }
+        else { const h = sw / ratio; sy = (sh - h) * 0.3; sh = h; }   // نميل للأعلى قليلاً للحفاظ على الوجوه
+      }
+      const sc = Math.min(1, maxW / sw);
+      const cv = document.createElement('canvas'); cv.width = Math.round(sw * sc); cv.height = Math.round(sh * sc);
+      cv.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
       if (keepAlpha) { const d = cv.toDataURL('image/png'); if (d.length < 800e3) return res(d); return res(cv.toDataURL('image/webp', .9)); }
       let q = .85, d = cv.toDataURL('image/jpeg', q);
       while (d.length > 750e3 && q > .4) { q -= .1; d = cv.toDataURL('image/jpeg', q); }
@@ -40,7 +47,7 @@ const SCHEMAS = {
   slides: {
     title: 'شريحة', fields: () => [
       { k: 'title', label: 'العنوان الظاهر على الشاشة', type: 'text', ph: 'مثال: درب الزلق' },
-      { k: 'image', label: 'صورة الشريحة', type: 'image', maxW: 1400, hint: 'صورة عريضة (أفقية). إن تُركت فارغة تُستخدم صورة المقطع المرتبط.' },
+      { k: 'image', label: 'صورة الشريحة', type: 'image', maxW: 1400, ratio: TV_RATIO, hint: 'تُقص تلقائياً لتطابق مقاس شاشة التلفزيون. إن تُركت فارغة تُستخدم صورة المقطع المرتبط.' },
       { k: 'clipId', label: 'المقطع الذي يفتح عند الضغط على الشاشة', type: 'select', opts: () => [['', '— بدون —'], ...D.clips.map(c => [c.id, c.title])] },
       { k: 'active', label: 'تظهر في شاشة التلفزيون', type: 'switch', def: true }
     ]
@@ -102,7 +109,7 @@ function bindFields(root, fields) {
     box.querySelector('input[type=file]').onchange = async e => {
       const file = e.target.files[0]; if (!file) return;
       prev.textContent = 'جارٍ التجهيز…';
-      try { const d = await compress(file, f.maxW || 1400, f.logo); hidden.value = d; prev.style.backgroundImage = `url('${d}')`; prev.textContent = ''; }
+      try { const d = await compress(file, f.maxW || 1400, f.logo, f.ratio); hidden.value = d; prev.style.backgroundImage = `url('${d}')`; prev.textContent = ''; }
       catch (err) { prev.textContent = err.message; }
     };
     box.querySelector('[data-clear]').onclick = () => { hidden.value = ''; prev.style.backgroundImage = ''; prev.textContent = 'لا توجد صورة'; };
@@ -200,11 +207,21 @@ function renderList(col) {
     if (filterText) items = items.filter(c => c.title.includes(filterText));
   }
   $('#main').innerHTML = `
-    <div class="head"><div><h1>${h}</h1><p>${p}</p></div><button class="btn dark" id="addBtn">${icon('plus')}${add}</button></div>
+    <div class="head"><div><h1>${h}</h1><p>${p}</p></div><div class="toolbar" style="margin:0">${col === 'slides' ? `<label class="btn" id="bulkBtn">${icon('plus')}رفع عدة صور دفعة واحدة<input type="file" accept="image/*" multiple hidden id="bulkInput"></label>` : ''}<button class="btn dark" id="addBtn">${icon('plus')}${add}</button></div></div>
     ${col === 'clips' ? `<div class="toolbar"><input type="search" id="fText" placeholder="بحث في المقاطع…" value="${esc(filterText)}">
       <select id="fSeries"><option value="">كل المسلسلات</option>${D.series.map(s => `<option value="${s.id}" ${s.id === filterSeries ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>` : ''}
     ${items.length ? `<div class="items">${items.map(x => itemRow(col, x)).join('')}</div>` : `<div class="empty">لا توجد عناصر بعد — اضغطي «${add}»</div>`}`;
   $('#addBtn').onclick = () => openForm(col);
+  if (col === 'slides') $('#bulkInput').onchange = async e => {
+    const files = [...e.target.files]; if (!files.length) return;
+    let order = Math.max(0, ...D.slides.map(x => x.order || 0)), done = 0;
+    for (const f of files) {
+      toast(`جارٍ رفع الصور… ${done + 1} من ${files.length}`);
+      try { const d = await compress(f, 1400, false, TV_RATIO); await save('slides', null, { title: '', image: d, clipId: '', active: true, order: ++order }); done++; }
+      catch (err) { fail(err); break; }
+    }
+    await reload('slides'); renderTab(); toast(`تمت إضافة ${done} صورة إلى شاشة التلفزيون`);
+  };
   if (col === 'clips') {
     $('#fSeries').onchange = e => { filterSeries = e.target.value; renderList(col); };
     $('#fText').oninput = e => { filterText = e.target.value.trim(); clearTimeout(renderList._t); renderList._t = setTimeout(() => { renderList(col); const f = $('#fText'); f.focus(); f.setSelectionRange(f.value.length, f.value.length); }, 300); };
@@ -231,7 +248,7 @@ function renderList(col) {
 /* ---------------- الإعدادات العامة ---------------- */
 async function renderSettings() {
   const [site, logo, hero] = await Promise.all([getSetting('site'), getSetting('logo'), getSetting('hero')]);
-  const s = { siteName: 'درب الزلق', heroTitle: 'أجمل المسلسلات .. في مكان واحد', heroSubtitle: 'مقاطع مختارة .. لحظات لا تُنسى من مسلسلات رمضان 2027', seasonsLabel: 'مواسم رمضان', ramadanLabel: 'مقاطع رمضان 2027', tvSeconds: 5, ...site };
+  const s = { siteName: 'درب الزلق', heroTitle: 'أجمل المسلسلات .. في مكان واحد', heroSubtitle: 'مقاطع مختارة .. لحظات لا تُنسى من مسلسلات رمضان 2027', seasonsLabel: 'مواسم رمضان', ramadanLabel: 'مقاطع رمضان 2027', tvSeconds: 7, ...site };
   window.__site = s;
   const textF = [
     { k: 'siteName', label: 'اسم المنصة', type: 'text' },
@@ -250,7 +267,7 @@ async function renderSettings() {
     <div class="panel"><h2>الشعار</h2><div id="pLogo">${fieldHTML(logoF[0], logo.data || '')}</div><div style="margin-top:14px"><button class="btn dark" id="saveLogo">حفظ الشعار</button></div></div>
     <div class="panel"><h2>خلفية الواجهة</h2><div id="pHero">${fieldHTML(heroF[0], hero.data || '')}</div><div style="margin-top:14px"><button class="btn dark" id="saveHero">حفظ الخلفية</button></div></div>`;
   bindFields($('#pLogo'), logoF); bindFields($('#pHero'), heroF);
-  $('#saveText').onclick = async () => { const d = readFields($('#pText'), textF); d.tvSeconds = Math.max(2, parseInt(d.tvSeconds) || 5); try { await saveSetting('site', d); window.__site = { ...s, ...d }; toast('تم حفظ النصوص'); } catch (e) { fail(e); } };
+  $('#saveText').onclick = async () => { const d = readFields($('#pText'), textF); d.tvSeconds = Math.max(2, parseInt(d.tvSeconds) || 7); try { await saveSetting('site', d); window.__site = { ...s, ...d }; toast('تم حفظ النصوص'); } catch (e) { fail(e); } };
   $('#saveLogo').onclick = async () => { try { await saveSetting('logo', readFields($('#pLogo'), logoF)); toast('تم حفظ الشعار'); paintLogo(); } catch (e) { fail(e); } };
   $('#saveHero').onclick = async () => { try { await saveSetting('hero', readFields($('#pHero'), heroF)); toast('تم حفظ الخلفية'); } catch (e) { fail(e); } };
 }

@@ -158,7 +158,7 @@ function startTV() {
     slides.forEach((s, i) => s.classList.toggle('on', i === cur));
     scr.querySelectorAll('[data-dot]').forEach((d, i) => d.classList.toggle('on', i === cur));
   };
-  const ms = Math.max(2, +S.site.tvSeconds || 5) * 1000;
+  const ms = Math.max(2, +S.site.tvSeconds || 7) * 1000;
   const restart = () => { clearInterval(tvTimer); tvTimer = setInterval(() => go(cur + 1), ms); };
   document.querySelectorAll('[data-tv]').forEach(b => b.onclick = () => { go(cur + +b.dataset.tv); restart(); });
   scr.querySelectorAll('[data-dot]').forEach(b => b.onclick = e => { e.stopPropagation(); go(+b.dataset.dot); restart(); });
