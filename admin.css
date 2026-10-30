@@ -106,7 +106,7 @@ textarea{min-height:80px;resize:vertical}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.err{background:var(--red)}
 
-@media (max-width:860px){
+@media (max-width:739px){
   .shell{grid-template-columns:1fr}
   .side{position:sticky;z-index:20;height:auto;flex-direction:row;align-items:center;padding:8px;gap:6px;overflow-x:auto}
   .side-brand,.side-foot .side-link span:not(.ic){display:none}
@@ -126,4 +126,15 @@ textarea{min-height:80px;resize:vertical}
 
 .side-home{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 16px;padding:12px 14px;border-radius:12px;border:1.5px solid var(--amber);color:var(--amber);font-weight:800;font-size:15.5px;transition:all .2s}
 .side-home:hover{background:var(--amber);color:var(--ink)}
-@media (max-width:860px){.side-home{margin:0;padding:9px 12px;white-space:nowrap;flex:none;font-size:14px}}
+@media (max-width:739px){.side-home{margin:0;padding:9px 12px;white-space:nowrap;flex:none;font-size:14px}}
+/* الآيباد: نفس شكل اللابتوب مع قائمة جانبية أنحف */
+@media (min-width:740px) and (max-width:1099px){
+  .shell{grid-template-columns:220px 1fr}
+  .side{padding:16px 10px}
+  .side-nav button,.side-link{font-size:15px;padding:11px 12px}
+  .main{padding:24px 20px 50px}
+  .form-grid{grid-template-columns:1fr}
+  .item{grid-template-columns:auto 110px 1fr auto}
+  .item .pic{width:110px}
+  .head .toolbar{flex-wrap:wrap}
+}
