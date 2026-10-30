@@ -1,4 +1,4 @@
-import { DEMO, CATEGORIES, ytId, ytThumb, mergeChannels, isDefaultChannel, CHANNEL_ICONS, list, getSetting, save, saveSetting, remove, authWatch, login, logout, resetPassword, resetDemo, init } from './data.js';
+import { DEMO, CATEGORIES, ytId, ytThumb, streamInfo, mergeChannels, isDefaultChannel, CHANNEL_ICONS, list, getSetting, save, saveSetting, remove, authWatch, login, logout, resetPassword, resetDemo, init } from './data.js';
 import { I, CH } from './icons.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -78,14 +78,14 @@ const SCHEMAS = {
       { k: 'desc', label: 'الوصف القصير', type: 'text' },
       { k: 'color', label: 'لون القناة', type: 'color', def: '#7e2233' },
       { k: 'icon', label: 'الأيقونة', type: 'select', opts: () => Object.entries(CHANNEL_ICONS) },
-      { k: 'youtube', label: 'رابط البث المباشر من يوتيوب', type: 'youtube', hint: 'رابط بث القناة (youtube.com/live/…). يظهر داخل صفحة القناة.' },
+      { k: 'youtube', label: 'رابط البث المباشر', type: 'stream', hint: 'يوتيوب وTwitch يشتغلان داخل صفحة القناة. أي رابط آخر يظهر كزر يفتح البث مباشرة.' },
       { k: 'isLive', label: 'مباشر الآن (تظهر نقطة حمراء بجانب القناة)', type: 'switch', def: false }
     ]
   },
   live: {
     title: 'بث مباشر', fields: () => [
       { k: 'title', label: 'عنوان البث', type: 'text', req: true },
-      { k: 'youtube', label: 'رابط البث من يوتيوب', type: 'youtube', hint: 'رابط البث المباشر (youtube.com/live/…) أو رابط فيديو عادي' },
+      { k: 'youtube', label: 'رابط البث', type: 'stream', hint: 'يوتيوب وTwitch يشتغلان داخل الموقع. أي رابط آخر يُفتح مباشرة بزر.' },
       { k: 'desc', label: 'وصف قصير', type: 'text' },
       { k: 'poster', label: 'صورة الغلاف', type: 'image', maxW: 1400, hint: 'اختيارية — تُستخدم صورة يوتيوب تلقائياً.' },
       { k: 'isLive', label: 'مباشر الآن (تظهر شارة «مباشر» في الموقع)', type: 'switch', def: true }
@@ -107,6 +107,11 @@ function fieldHTML(f, v) {
         <div class="imgprev ${f.logo ? 'logo' : ''}" style="${v ? `background-image:url('${v}')` : ''}">${v ? '' : 'لا توجد صورة'}</div>
         <div class="btns"><label class="btn ghost">اختيار صورة<input type="file" accept="image/*" hidden></label><button type="button" class="btn ghost" data-clear>إزالة</button></div>
         <input type="hidden" name="${f.k}" value="${esc(v)}"></div>${hint}</div>`;
+    case 'stream': {
+      const st = streamInfo(v);
+      return `<label>${f.label}<input id="${id}" name="${f.k}" value="${esc(v)}" dir="ltr" placeholder="https://www.twitch.tv/... أو https://www.youtube.com/live/..." ${f.req ? 'required' : ''}>${hint}
+        <div class="ytprev" data-st>${st ? `<span class="tag">${st.embed ? '✓ يشتغل داخل الموقع' : '↗ يُفتح بزر'}: ${st.label}</span>` : ''}</div></label>`;
+    }
     case 'youtube': {
       const yid = ytId(v);
       return `<label>${f.label}<input id="${id}" name="${f.k}" value="${esc(v)}" dir="ltr" placeholder="https://www.youtube.com/watch?v=..." ${f.req ? 'required' : ''}>${hint}
@@ -128,6 +133,10 @@ function bindFields(root, fields) {
     };
     box.querySelector('[data-clear]').onclick = () => { hidden.value = ''; prev.style.backgroundImage = ''; prev.textContent = 'لا توجد صورة'; };
   });
+  root.querySelectorAll('[data-st]').forEach(p => {
+    const inp = p.parentElement.querySelector('input');
+    inp.addEventListener('input', () => { const st = streamInfo(inp.value); p.innerHTML = st ? `<span class="tag">${st.embed ? '✓ يشتغل داخل الموقع' : '↗ يُفتح بزر'}: ${st.label}</span>` : (inp.value ? '<span class="tag warn">الرابط غير صحيح — يجب أن يبدأ بـ https://</span>' : ''); });
+  });
   root.querySelectorAll('[data-yt]').forEach(p => {
     const inp = p.parentElement.querySelector('input');
     inp.addEventListener('input', async () => {
@@ -146,6 +155,7 @@ function readFields(root, fields) {
   for (const f of fields) {
     if (f.type === 'checks') o[f.k] = [...root.querySelectorAll(`[name="${f.k}"]:checked`)].map(x => x.value);
     else if (f.type === 'switch') o[f.k] = root.querySelector(`[name="${f.k}"]`).checked;
+    else if (f.type === 'stream') { const v = root.querySelector(`[name="${f.k}"]`).value.trim(); o[f.k] = streamInfo(v) ? v : ''; }
     else if (f.type === 'youtube') o[f.k] = ytId(root.querySelector(`[name="${f.k}"]`).value) ? root.querySelector(`[name="${f.k}"]`).value.trim() : '';
     else o[f.k] = root.querySelector(`[name="${f.k}"]`).value.trim();
   }
@@ -195,9 +205,9 @@ function itemRow(col, x) {
   } else if (col === 'channels') {
     title = x.name;
     const n = D.clips.filter(c => c.channelId === x.id).length + D.series.filter(c => c.channelId === x.id).length;
-    meta = [x.desc ? `<span class="tag">${esc(x.desc)}</span>` : '', x.isLive && ytId(x.youtube) ? '<span class="tag live">● مباشر الآن</span>' : (ytId(x.youtube) ? '<span class="tag">رابط البث مضاف</span>' : '<span class="tag off">بلا بث</span>'), `<span class="tag">${n} عنصر</span>`];
+    meta = [x.desc ? `<span class="tag">${esc(x.desc)}</span>` : '', x.isLive && streamInfo(x.youtube) ? `<span class="tag live">● مباشر الآن — ${streamInfo(x.youtube).label}</span>` : (streamInfo(x.youtube) ? `<span class="tag">رابط ${streamInfo(x.youtube).label} مضاف</span>` : '<span class="tag off">بلا بث</span>'), `<span class="tag">${n} عنصر</span>`];
   } else if (col === 'live') {
-    pic = x.poster || (ytId(x.youtube) ? ytThumb(ytId(x.youtube)) : ''); title = x.title;
+    pic = x.poster || (streamInfo(x.youtube)?.thumb || ''); title = x.title;
     meta = [x.isLive ? '<span class="tag live">● مباشر الآن</span>' : '<span class="tag off">متوقف</span>', x.desc ? `<span class="tag">${esc(x.desc)}</span>` : ''];
   }
   return `<div class="item" data-id="${x.id}">

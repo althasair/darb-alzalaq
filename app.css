@@ -195,12 +195,12 @@ img{display:block;max-width:100%}
 /* شريط التنقل السفلي (للجوال) */
 .tabbar{display:none}
 
-@media (max-width:1100px){
+@media (max-width:1199px){
   .cats{grid-template-columns:repeat(3,1fr)}
   .track{grid-auto-columns:calc((100% - 2*18px)/3)}
   .track-s{grid-auto-columns:calc((100% - 3*18px)/4)}
 }
-@media (max-width:900px){
+@media (max-width:1199px){
   .topbar{grid-template-columns:auto 1fr auto;padding:10px 14px}
   .nav-main{display:none}
   .brand{order:-1}
@@ -247,9 +247,10 @@ img{display:block;max-width:100%}
 .rail{display:none}
 .ch-ic{--c:#7e2233;width:44px;height:44px;flex:none;border-radius:13px;background:var(--c);color:#fff;display:grid;place-items:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18)}
 .ch-ic svg{width:22px;height:22px}
-@media (min-width:1101px){
+@media (min-width:1500px){
   body{padding-inline-start:var(--rail)}
   .topbar{inset-inline-start:var(--rail)}
+  .nav-channels{display:none!important}
   .rail{display:flex;flex-direction:column;position:fixed;z-index:40;top:0;bottom:0;inset-inline-start:0;width:var(--rail);background:#140c07;border-inline-end:1px solid rgba(246,195,124,.14);color:#f3e6d6}
   .rail-head{display:flex;align-items:center;gap:10px;padding:26px 22px 14px;font-family:var(--display);font-size:22px;color:var(--amber)}
   .rail-head .ic{width:22px;height:22px}
@@ -287,9 +288,85 @@ img{display:block;max-width:100%}
 .ch-head .pill-live .live-dot{background:#fff}
 .ch-player{aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);max-width:1000px}
 .ch-player iframe{width:100%;height:100%;border:0;display:block}
-@media (max-width:900px){.chgrid{grid-template-columns:1fr 1fr;gap:10px}.chcard{flex-direction:column;align-items:flex-start;padding:14px;gap:10px}.chcard b{font-size:16px}.chcard small{font-size:13px}.chcard .ch-ic{width:48px;height:48px}}
+@media (max-width:599px){.chgrid{grid-template-columns:1fr 1fr;gap:10px}.chcard{flex-direction:column;align-items:flex-start;padding:14px;gap:10px}.chcard b{font-size:16px}.chcard small{font-size:13px}.chcard .ch-ic{width:48px;height:48px}}
 
 /* أيقونة تعديل صور الشاشة (للمشرفين فقط) */
 .tv-edit{position:absolute;z-index:5;top:-14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:var(--amber);color:var(--ink);font-weight:800;font-size:14px;direction:rtl;box-shadow:0 8px 20px rgba(0,0,0,.45);transition:background .2s}
 .tv-edit:hover{background:#fff}
 .tv-edit .ic{width:18px;height:18px}
+
+.sec-head .open-ext{padding:9px 16px;font-size:14px;color:var(--ink)}
+.sec-head .open-ext .ic{width:15px;height:15px}
+
+.ch-extlink{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;aspect-ratio:16/9;max-width:1000px;border-radius:20px;color:#fff;text-align:center;background:radial-gradient(circle at 50% 40%,#5b341f,#140c07);box-shadow:var(--shadow)}
+.ch-extlink .playc{position:static;width:78px;height:78px}
+.ch-extlink .playc .ic{width:34px;height:34px}
+.ch-extlink b{font-size:24px;font-family:var(--display)}
+.ch-extlink small{color:#e7d3bd;font-size:15px}
+
+/* ---------- الآيباد والأجهزة اللوحية (600–1199px): خطوط وأيقونات أكبر وتبويبات واضحة ---------- */
+@media (min-width:600px) and (max-width:1199px){
+  html{-webkit-text-size-adjust:100%}
+  body{padding-bottom:calc(92px + var(--safe-b))}
+  .topbar{padding:16px 24px}
+  .brand img{height:76px}
+  .nav-tools{gap:6px}
+  .nav-tools .t{display:inline}
+  .nav-tools .tool{padding:11px 16px;font-size:17px}
+  .nav-tools .ic{width:22px;height:22px}
+  .hero{padding:124px 32px 90px}
+  .hero-text h1{font-size:clamp(42px,5.6vw,60px)}
+  .hero-text p{font-size:21px;max-width:36ch}
+  .tv-wrap{max-width:680px;margin:0 auto;width:100%}
+  .tv-arrow{width:52px;height:52px}
+  .searchbar input{font-size:19px;padding:14px 4px}
+  .sheet{padding:30px 28px 40px}
+  .cats{grid-template-columns:repeat(3,1fr);gap:14px}
+  .cats .cat:nth-child(4),.cats .cat:nth-child(5){grid-column:span 1}
+  .cat{min-height:92px;padding:18px}
+  .cat .big{width:52px;height:52px}
+  .cat b{font-size:18px}
+  .sec-head h2{font-size:26px}
+  .sec-head a{font-size:17px}
+  .track{grid-auto-columns:calc((100% - 2*16px)/3);gap:16px}
+  .track-s{grid-auto-columns:calc((100% - 3*16px)/4)}
+  .card-foot h3{font-size:17px}
+  .card-foot small{font-size:14.5px}
+  .grid{grid-template-columns:repeat(3,1fr);gap:26px 18px}
+  .grid.series{grid-template-columns:repeat(4,1fr)}
+  .chgrid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .chcard b{font-size:20px}
+  .chcard small{font-size:16px}
+  .chip{font-size:16.5px;padding:11px 20px}
+  .page-hero{padding:124px 32px 80px}
+  .page-hero p{font-size:19px}
+  .liveband .lb-text{padding:30px}
+  .liveband p{font-size:17px}
+  .btn{font-size:17px;padding:13px 24px}
+  .tabbar{padding:8px 12px calc(10px + var(--safe-b))}
+  .tabbar a{font-size:15px;gap:5px;padding:8px 14px;min-width:96px;font-weight:700}
+  .tabbar a .ic{width:28px;height:28px}
+  .tabbar .live-dot{top:6px;right:30px}
+  .player{padding:24px;place-items:center}
+  .player-box{border-radius:22px;max-height:calc(100vh - 48px)}
+  .player-info h2{font-size:24px}
+  .pill-btn{font-size:16px;padding:12px 18px}
+  .foot{display:block}
+}
+/* الآيباد بالوضع الأفقي: العنوان بجانب التلفزيون */
+@media (min-width:1000px) and (max-width:1199px){
+  .hero-inner{grid-template-columns:1fr 1.15fr}
+  .hero-text{text-align:start}
+  .hero-text p{margin:0}
+  .tv-wrap{max-width:none}
+  .grid{grid-template-columns:repeat(4,1fr)}
+  .grid.series{grid-template-columns:repeat(5,1fr)}
+  .chgrid{grid-template-columns:repeat(3,1fr)}
+  .track{grid-auto-columns:calc((100% - 3*16px)/4)}
+  .track-s{grid-auto-columns:calc((100% - 4*16px)/5)}
+}
+/* الشاشات المتوسطة بدون شريط القنوات الجانبي: تصغير بسيط للقائمة العلوية */
+@media (min-width:1200px) and (max-width:1499px){
+  .nav-link,.tool{padding:10px 13px;font-size:15.5px}
+  .brand img{height:clamp(60px,6vw,84px)}
+}

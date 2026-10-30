@@ -32,6 +32,37 @@ export function ytId(input) {
   const m = s.match(/(?:youtu\.be\/|v=|\/shorts\/|\/live\/|\/embed\/)([\w-]{11})/);
   return m ? m[1] : '';
 }
+/* ---------------- Twitch ---------------- */
+// يقبل: twitch.tv/اسم_القناة أو twitch.tv/videos/رقم أو اسم القناة وحده مع twitch:
+export function twitchInfo(input) {
+  const s = String(input || '').trim();
+  let m = s.match(/twitch\.tv\/videos\/(\d+)/i);
+  if (m) return { video: m[1] };
+  m = s.match(/twitch\.tv\/([A-Za-z0-9_]{3,25})(?:[/?#]|$)/i);
+  if (m && !['videos', 'directory', 'p', 'settings', 'downloads'].includes(m[1].toLowerCase())) return { channel: m[1].toLowerCase() };
+  return null;
+}
+// معلومات البث لأي رابط (يوتيوب أو Twitch)
+export function streamInfo(url) {
+  const y = ytId(url);
+  if (y) return { kind: 'youtube', open: `https://www.youtube.com/watch?v=${y}`, thumb: ytThumb(y), label: 'يوتيوب',
+    embed: (auto) => `https://www.youtube-nocookie.com/embed/${y}?rel=0&playsinline=1${auto ? '&autoplay=1' : ''}` };
+  const t = twitchInfo(url);
+  if (t) {
+    const host = location.hostname || 'localhost';
+    const q = t.channel ? `channel=${t.channel}` : `video=${t.video}`;
+    return { kind: 'twitch', open: t.channel ? `https://www.twitch.tv/${t.channel}` : `https://www.twitch.tv/videos/${t.video}`,
+      thumb: t.channel ? `https://static-cdn.jtvnw.net/previews-ttv/live_user_${t.channel}-640x360.jpg` : '', label: 'Twitch',
+      embed: (auto) => `https://player.twitch.tv/?${q}&parent=${host}&autoplay=${auto ? 'true' : 'false'}&muted=${auto ? 'true' : 'false'}` };
+  }
+  // أي رابط آخر: لا يُعرض داخل الموقع (أغلب المواقع تمنع ذلك)، بل يُفتح مباشرة بزر
+  if (/^https?:\/\/[^\s]+\.[^\s]+/i.test(String(url || '').trim())) {
+    const u = String(url).trim(); let host = '';
+    try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return null; }
+    return { kind: 'link', open: u, thumb: '', label: host, embed: null };
+  }
+  return null;
+}
 export const ytThumb = (id, q = 'hqdefault') => id ? `https://i.ytimg.com/vi/${id}/${q}.jpg` : '';
 
 /* ---------------- وضع التجربة ---------------- */

@@ -1,4 +1,4 @@
-import { loadAll, CATEGORIES, ytId, ytThumb, addView, DEMO, authWatch } from './data.js';
+import { loadAll, CATEGORIES, ytId, ytThumb, addView, DEMO, authWatch, streamInfo } from './data.js';
 import { I, CH } from './icons.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -64,9 +64,9 @@ function seriesCard(s) {
 }
 
 function liveCard(l) {
-  const id = ytId(l.youtube);
+  const id = ytId(l.youtube); const lst = streamInfo(l.youtube);
   return `<article class="card">
-    <a href="#/watch-live/${l.id}" class="thumb">${thumbHTML(l.poster || (id ? ytThumb(id) : ''), l.title)}
+    <a href="#/watch-live/${l.id}" class="thumb">${thumbHTML(l.poster || (lst ? lst.thumb : ''), l.title)}
       ${l.isLive ? `<span class="live-badge"><span class="live-dot"></span>مباشر</span>` : ''}
       <span class="playc">${icon('play')}</span></a>
     <div class="card-foot"><h3>${esc(l.title)}${l.desc ? `<small>${esc(l.desc)}</small>` : ''}</h3></div>
@@ -128,7 +128,7 @@ function viewHome() {
   <div class="sheet"><div class="wrap">
     <div class="cats">${catsHTML}</div>
     ${lv ? `<section class="liveband">
-        <a class="lb-media" href="#/watch-live/${lv.id}">${thumbHTML(lv.poster || (ytId(lv.youtube) ? ytThumb(ytId(lv.youtube), 'maxresdefault') : ''), '')}<span class="playc">${icon('play')}</span></a>
+        <a class="lb-media" href="#/watch-live/${lv.id}">${thumbHTML(lv.poster || (ytId(lv.youtube) ? ytThumb(ytId(lv.youtube), 'maxresdefault') : (streamInfo(lv.youtube)?.thumb || '')), '')}<span class="playc">${icon('play')}</span></a>
         <div class="lb-text"><span class="pill-live"><span class="live-dot"></span>مباشر الآن</span>
           <h2>${esc(lv.title)}</h2>${lv.desc ? `<p>${esc(lv.desc)}</p>` : ''}
           <a class="btn" href="#/watch-live/${lv.id}">${icon('play')} شاهدي البث</a></div></section>` : ''}
@@ -199,7 +199,7 @@ function viewSeasons() {
   return pageHero(S.site.seasonsLabel, 'المسلسلات مرتبة حسب الموسم') + sheet(keys.length ? keys.map(k => `<div class="season-block">${row(k, groups[k], '', seriesCard).replace('class="sec"', 'class="sec"')}</div>`).join('') : empty('لا توجد مواسم بعد', 'moon'));
 }
 /* ---------------- القنوات ---------------- */
-const chLive = c => !!(c.isLive && ytId(c.youtube));
+const chLive = c => !!(c.isLive && streamInfo(c.youtube));
 const chIcon = c => `<span class="ch-ic" style="--c:${esc(c.color || '#7e2233')}">${CH[c.icon] || CH.tv}</span>`;
 function renderRail() {
   $('#railList').innerHTML = S.channels.map(c => `<a class="rail-item" href="#/channel/${c.id}" data-ch="${c.id}">
@@ -215,14 +215,16 @@ function viewChannels() {
 function viewChannel(id) {
   const c = S.channels.find(x => x.id === id);
   if (!c) return pageHero('غير موجودة') + sheet(empty('هذه القناة غير موجودة', 'tv'));
-  const yid = ytId(c.youtube);
+  const st = streamInfo(c.youtube);
   const ser = S.series.filter(s => s.channelId === id);
   const clips = S.clips.filter(x => x.channelId === id || ser.some(s => s.id === x.seriesId));
   const head = `<section class="page-hero ch-hero" style="--c:${esc(c.color || '#7e2233')}">
       <div class="ch-head">${chIcon(c)}<div><h1>${esc(c.name)}</h1><p>${esc(c.desc || '')}</p></div>
       ${chLive(c) ? '<span class="pill-live"><span class="live-dot"></span>مباشر الآن</span>' : ''}</div></section>`;
-  const live = yid ? `<section class="sec"><div class="sec-head"><h2>${chLive(c) ? 'البث المباشر' : 'بث القناة'}</h2></div>
-      <div class="ch-player"><iframe src="https://www.youtube-nocookie.com/embed/${yid}?rel=0&playsinline=1" title="${esc(c.name)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div></section>` : '';
+  const live = st ? `<section class="sec"><div class="sec-head"><h2>${chLive(c) ? 'البث المباشر' : 'بث القناة'}</h2>
+        <a class="btn open-ext" href="${esc(st.open)}" target="_blank" rel="noopener">فتح البث على ${st.label} ${icon('left')}</a></div>
+      ${st.embed ? `<div class="ch-player"><iframe src="${esc(st.embed(chLive(c)))}" title="${esc(c.name)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`
+        : `<a class="ch-extlink" href="${esc(st.open)}" target="_blank" rel="noopener"><span class="playc">${icon('play')}</span><b>شاهدي البث الآن</b><small>يُفتح على ${esc(st.label)}</small></a>`}</section>` : '';
   const body = live + row('المسلسلات', ser, '', seriesCard) + (clips.length ? `<section class="sec"><div class="sec-head"><h2>المقاطع</h2></div>${grid(clips)}</section>` : '');
   return head + sheet(body || empty('لم يُضف محتوى لهذه القناة بعد — يُضاف من لوحة التحكم', 'tv'));
 }
@@ -250,10 +252,14 @@ function viewSearch(q) {
 /* ---------------- المشغل ---------------- */
 function openPlayer({ title, meta, yt, clipId, live, more }) {
   const p = $('#player');
-  const id = ytId(yt);
-  $('#playerFrame').innerHTML = id
-    ? `<iframe src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&playsinline=1" title="${esc(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
-    : `<div class="noyt">لم يُضف رابط يوتيوب لهذا ${live ? 'البث' : 'المقطع'} بعد.<br>يمكن إضافته من لوحة التحكم.</div>`;
+  const st = streamInfo(yt);
+  $('#playerFrame').innerHTML = st && !st.embed
+    ? `<div class="noyt"><a class="btn" href="${esc(st.open)}" target="_blank" rel="noopener">${icon('play')} شاهدي البث على ${esc(st.label)}</a></div>`
+    : st
+    ? `<iframe src="${esc(st.embed(true))}" title="${esc(title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+    : `<div class="noyt">لم يُضف رابط ${live ? 'البث' : 'المقطع'} بعد.<br>يمكن إضافته من لوحة التحكم.</div>`;
+  const ext = $('#playerExt');
+  if (st && st.kind !== 'youtube') { ext.hidden = false; ext.href = st.open; ext.textContent = 'فتح على ' + st.label; } else ext.hidden = true;
   $('#playerTitle').textContent = title;
   $('#playerMeta').textContent = meta || '';
   const fb = $('#playerFav');

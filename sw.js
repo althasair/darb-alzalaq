@@ -1,5 +1,5 @@
 // يجعل الموقع يعمل كتطبيق ويُفتح بسرعة؛ الصفحات تُجلب من الشبكة أولاً ليظهر أحدث محتوى
-const CACHE = 'farjan-v8';
+const CACHE = 'farjan-v11';
 const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'data.js', 'icons.js', 'firebase-config.js', 'logo.png', 'icon-192.png', 'icon-512.png', 'manifest.json', 'hero.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
