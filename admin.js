@@ -39,7 +39,7 @@ function compress(file, maxW, keepAlpha, ratio) {
 
 /* ---------------- الحالة ---------------- */
 const D = { series: [], clips: [], slides: [], live: [], channels: [] };
-let tab = ['settings', 'slides', 'series', 'clips', 'channels', 'live'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'settings';
+let tab = ['settings', 'slides', 'series', 'programs', 'clips', 'channels', 'live'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'settings';
 async function reload(col) { D[col] = col === 'channels' ? mergeChannels(await list(col)) : await list(col); }
 const chOpts = () => [['', '— بدون قناة —'], ...D.channels.map(c => [c.id, c.name])];
 
@@ -163,10 +163,10 @@ function readFields(root, fields) {
 }
 
 /* ---------------- نافذة الإضافة / التعديل ---------------- */
-function openForm(col, item) {
+function openForm(col, item, preset) {
   const sc = SCHEMAS[col]; const fields = sc.fields(); const dlg = $('#dlg');
   $('#dlgTitle').textContent = (item ? 'تعديل ' : 'إضافة ') + sc.title;
-  $('#dlgBody').innerHTML = fields.map(f => fieldHTML(f, item ? item[f.k] : (f.def ?? ''))).join('');
+  $('#dlgBody').innerHTML = fields.map(f => fieldHTML(f, item ? item[f.k] : (preset && f.k in preset ? preset[f.k] : (f.def ?? '')))).join('');
   fillIcons(dlg); bindFields($('#dlgBody'), fields);
   dlg.showModal();
   $('#dlgSave').onclick = async e => {
@@ -227,11 +227,13 @@ const TAB_INFO = {
 };
 let filterSeries = '', filterText = '';
 
-function renderList(col) {
-  const [h, p, add] = TAB_INFO[col];
+function renderList(col, mode) {
+  const progs = mode === 'programs';
+  const [h, p, add] = progs ? ['البرامج', 'البرامج المنوعة — كل ما يُضاف هنا يظهر في صفحة «البرامج» في الموقع', 'إضافة برنامج'] : TAB_INFO[col];
   let items = D[col];
   if (col === 'clips') {
     items = [...items].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    if (progs) items = items.filter(c => (c.cats || []).includes('variety'));
     if (filterSeries) items = items.filter(c => c.seriesId === filterSeries);
     if (filterText) items = items.filter(c => c.title.includes(filterText));
   }
@@ -240,7 +242,7 @@ function renderList(col) {
     ${col === 'clips' ? `<div class="toolbar"><input type="search" id="fText" placeholder="بحث في المقاطع…" value="${esc(filterText)}">
       <select id="fSeries"><option value="">كل المسلسلات</option>${D.series.map(s => `<option value="${s.id}" ${s.id === filterSeries ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select></div>` : ''}
     ${items.length ? `<div class="items">${items.map(x => itemRow(col, x)).join('')}</div>` : `<div class="empty">لا توجد عناصر بعد — اضغطي «${add}»</div>`}`;
-  $('#addBtn').onclick = () => openForm(col);
+  $('#addBtn').onclick = () => openForm(col, null, progs ? { cats: ['variety'] } : null);
   if (col === 'slides') $('#tvSecs').onchange = async e => {
     const n = +e.target.value;
     try { await saveSetting('site', { tvSeconds: n }); window.__site = { ...(window.__site || {}), tvSeconds: n }; toast(`صارت الصورة تتغير كل ${n} ثوانٍ`); } catch (err) { fail(err); }
@@ -257,8 +259,8 @@ function renderList(col) {
     if (done && confirm(`تمت إضافة ${done} صورة. هل تريدين الرجوع للصفحة الرئيسية لمشاهدتها؟`)) location.href = 'index.html';
   };
   if (col === 'clips') {
-    $('#fSeries').onchange = e => { filterSeries = e.target.value; renderList(col); };
-    $('#fText').oninput = e => { filterText = e.target.value.trim(); clearTimeout(renderList._t); renderList._t = setTimeout(() => { renderList(col); const f = $('#fText'); f.focus(); f.setSelectionRange(f.value.length, f.value.length); }, 300); };
+    $('#fSeries').onchange = e => { filterSeries = e.target.value; renderList(col, mode); };
+    $('#fText').oninput = e => { filterText = e.target.value.trim(); clearTimeout(renderList._t); renderList._t = setTimeout(() => { renderList(col, mode); const f = $('#fText'); f.focus(); f.setSelectionRange(f.value.length, f.value.length); }, 300); };
     $('.items')?.querySelectorAll('[data-move]').forEach(b => b.closest('.ord').style.visibility = 'hidden');
   }
   $('#main').querySelectorAll('.item').forEach(row => {
@@ -309,7 +311,7 @@ async function paintLogo() { try { const l = await getSetting('logo'); if (l.dat
 
 function renderTab() {
   document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
-  if (tab === 'settings') renderSettings().catch(fail); else renderList(tab);
+  if (tab === 'settings') renderSettings().catch(fail); else if (tab === 'programs') renderList('clips', 'programs'); else renderList(tab);
 }
 
 /* ---------------- التشغيل ---------------- */

@@ -371,3 +371,5 @@ img{display:block;max-width:100%}
   .nav-main .nav-link{padding:8px 11px;font-size:14.5px;flex:none}
   .nav-main .nav-link .ic{display:none}
 }
+
+@media (max-width:739px){ .tabbar a{min-width:0;flex:1;padding:6px 2px;font-size:11px} }
