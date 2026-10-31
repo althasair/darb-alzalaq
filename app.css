@@ -365,3 +365,9 @@ img{display:block;max-width:100%}
 
 @media (max-width:1499px){ .cats{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:739px){ .cats{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (min-width:740px) and (max-width:1099px){
+  .nav-main{flex-wrap:nowrap;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .nav-main::-webkit-scrollbar{display:none}
+  .nav-main .nav-link{padding:8px 11px;font-size:14.5px;flex:none}
+  .nav-main .nav-link .ic{display:none}
+}

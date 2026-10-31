@@ -317,7 +317,7 @@ function render(h) {
   switch (a) {
     case '': html = viewHome(); break;
     case 'clips': html = viewClips(); break;
-    case 'cat': html = viewClips(b); key = 'clips'; break;
+    case 'cat': html = viewClips(b); key = b === 'variety' ? 'variety' : 'clips'; break;
     case 'series': html = b ? viewSeries(b) : viewSeriesList(); break;
     case 'seasons': html = viewSeasons(); break;
     case 'live': html = viewLive(); break;
