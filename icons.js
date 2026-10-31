@@ -11,6 +11,7 @@ export const I = {
   heart: s('<path d="M12 20.3s-7.8-4.6-7.8-10.3A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.8 2.5c0 5.7-7.8 10.3-7.8 10.3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'),
   heartFill: s('<path d="M12 20.3s-7.8-4.6-7.8-10.3A4.3 4.3 0 0 1 12 7.5a4.3 4.3 0 0 1 7.8 2.5c0 5.7-7.8 10.3-7.8 10.3z" fill="currentColor"/>'),
   user: s('<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9.5" r="3.4" fill="currentColor"/><path d="M5.6 18.4a7.5 7.5 0 0 1 12.8 0" fill="currentColor"/>'),
+  mic: s('<rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5M8.5 21.5h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="m19.5 3.5.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" opacity=".7"/>'),
   play: s('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>'),
   left: s('<path d="m14.5 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'),
   right: s('<path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'),

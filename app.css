@@ -87,14 +87,14 @@ img{display:block;max-width:100%}
 /* ---------- المحتوى ---------- */
 .sheet{position:relative;z-index:2;background:var(--ivory);border-radius:36px 36px 0 0;margin-top:-40px;padding:30px clamp(16px,4vw,56px) 40px}
 .wrap{max-width:1320px;margin:0 auto}
-.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:34px}
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:34px}
 .cat{display:flex;align-items:center;gap:12px;padding:18px 18px;border-radius:var(--r);min-height:92px;transition:transform .2s,box-shadow .2s}
 .cat:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
 .cat .big{width:58px;height:58px;flex:none}
 .cat b{flex:1;font-size:17px;line-height:1.45;font-weight:700}
 .cat .chev{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.7);display:grid;place-items:center;flex:none}
 .cat .chev .ic{width:14px;height:14px}
-.t-rose{background:var(--rose-bg);color:var(--rose)} .t-peach{background:var(--peach-bg);color:var(--peach)} .t-mint{background:var(--mint-bg);color:var(--mint)} .t-blue{background:var(--blue-bg);color:var(--blue)} .t-lav{background:var(--lav-bg);color:var(--lav)}
+.t-rose{background:var(--rose-bg);color:var(--rose)} .t-gold{background:#fbf0cf;color:#b07d10} .t-peach{background:var(--peach-bg);color:var(--peach)} .t-mint{background:var(--mint-bg);color:var(--mint)} .t-blue{background:var(--blue-bg);color:var(--blue)} .t-lav{background:var(--lav-bg);color:var(--lav)}
 .cat b{color:var(--ink)}
 
 .sec{margin:8px 0 38px}
@@ -239,7 +239,7 @@ img{display:block;max-width:100%}
   .player-box{border-radius:22px 22px 0 0;max-height:94vh}
   .foot{display:none}
 }
-@media (max-width:420px){ .cats .cat:last-child{grid-column:span 2} }
+
 @media (max-width:739px){ .nav-channels{display:none} }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -362,3 +362,6 @@ img{display:block;max-width:100%}
 .cat b{min-width:0;overflow-wrap:anywhere}
 @media (min-width:740px) and (max-width:1099px){ .cat .chev{display:none} }
 @media (min-width:1100px) and (max-width:1499px){ .cat{padding:16px 14px;gap:10px} .cat .big{width:48px;height:48px} .cat b{font-size:16px} }
+
+@media (max-width:1499px){ .cats{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:739px){ .cats{grid-template-columns:repeat(2,minmax(0,1fr))} }

@@ -21,7 +21,8 @@ export const CATEGORIES = [
   { key: 'comedy',  label: 'الكوميديا',          tone: 'blue',  icon: 'masks' },
   { key: 'ramadan', label: 'مقاطع رمضان',        tone: 'mint',  icon: 'moon' },
   { key: 'gulf',    label: 'مسلسلات خليجية',     tone: 'peach', icon: 'tv' },
-  { key: 'top',     label: 'المقاطع الأكثر مشاهدة', tone: 'rose', icon: 'clapper' }
+  { key: 'top',     label: 'المقاطع الأكثر مشاهدة', tone: 'rose', icon: 'clapper' },
+  { key: 'variety', label: 'برامج منوعة',        tone: 'gold',  icon: 'mic' }
 ];
 
 /* ---------------- يوتيوب ---------------- */

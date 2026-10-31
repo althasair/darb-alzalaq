@@ -1,6 +1,6 @@
 // يجعل الموقع يعمل كتطبيق ويُفتح بسرعة؛ الصفحات تُجلب من الشبكة أولاً ليظهر أحدث محتوى
-const CACHE = 'farjan-v12';
-const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'data.js', 'icons.js', 'firebase-config.js', 'logo.png', 'icon-192.png', 'icon-512.png', 'manifest.json', 'hero.jpg'];
+const CACHE = 'farjan-v14';
+const SHELL = ['./', 'index.html', 'app.css', 'app.js', 'data.js', 'icons.js', 'firebase-config.js', 'logo.png', 'icon-192.png', 'icon-512.png', 'icon-maskable.png', 'apple-touch-icon.png', 'manifest.json', 'hero.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
